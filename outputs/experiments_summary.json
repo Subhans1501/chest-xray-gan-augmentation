@@ -1,0 +1,20 @@
+{
+    "experiment_1_baseline": {
+        "title": "Exp 1: Baseline DCGAN (Raw)",
+        "final_fid": 0.03,
+        "d_loss_final": 0.772,
+        "g_loss_final": 5.0628
+    },
+    "experiment_2_clahe": {
+        "title": "Exp 2: CLAHE Preprocessing",
+        "final_fid": 0.01,
+        "d_loss_final": 0.646,
+        "g_loss_final": 6.4818
+    },
+    "experiment_3_unsharp": {
+        "title": "Exp 3: Unsharp Masking",
+        "final_fid": 0.02,
+        "d_loss_final": 0.7877,
+        "g_loss_final": 8.3126
+    }
+}
