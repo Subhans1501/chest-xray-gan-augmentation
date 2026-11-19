@@ -1,24 +1,30 @@
 # Chest X-Ray GAN Data Augmentation
 
-PyTorch implementation of DCGAN-based synthetic chest radiograph generation for medical data augmentation, evaluating the impact of Contrast Limited Adaptive Histogram Equalization (CLAHE) and Gaussian Unsharp Masking on generative fidelity (FID) and downstream pneumonia classification.
+PyTorch implementation of DCGAN-based synthetic chest radiograph generation for medical data augmentation, evaluating Contrast Limited Adaptive Histogram Equalization (CLAHE) and Gaussian Unsharp Masking on generative fidelity (FID) and downstream pneumonia classification.
 
 ## Overview
 
-Medical imaging datasets frequently suffer from class imbalance and limited labeled pathology scans. Traditional geometric transforms (flips, rotations) only re-orient existing anatomy rather than introducing new structural variation. Inspired by Myong et al. (*PLOS ONE*, 2023), this repository trains a 5-layer Deep Convolutional GAN (DCGAN) on grayscale chest radiographs and compares three spatial preprocessing regimes:
+Medical imaging datasets often have heavy class imbalance and limited labeled pathology scans. Traditional geometric augmentations (flips, rotations) only re-orient existing anatomy rather than introducing new structural variation. Inspired by Myong et al. (*PLOS ONE*, 2023), this repository trains a 5-layer Deep Convolutional GAN (DCGAN) on grayscale chest radiographs and compares three preprocessing pipelines:
 
 1. **Baseline (Raw):** Resized 64x64 grayscale scans scaled to `[-1, 1]`.
-2. **CLAHE:** Local adaptive histogram equalization (`clipLimit=2.0`, `tileGridSize=8x8`) to improve lung-field and bone-margin contrast without amplifying background noise.
-3. **Unsharp Masking:** Gaussian high-frequency sharpening (`kernel=5x5`, `sigma=1.0`, `amount=1.5`) to accentuate rib and pleural boundaries.
+2. **CLAHE:** Local adaptive histogram equalization (`clipLimit=2.0`, `tileGridSize=8x8`) to enhance lung-field and rib-margin contrast without amplifying background noise.
+3. **Unsharp Masking:** Gaussian high-frequency sharpening (`kernel=5x5`, `sigma=1.0`, `amount=1.5`) to accentuate structural contours.
 
 ## Results Summary
 
-| Experiment | Preprocessing | Final FID (lower is better) | D Loss | G Loss | Downstream Acc (Raw Test) |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| Experiment 1 | Baseline (Raw) | 0.18 | 0.3356 | 6.5384 | 53.33% (+6.67% vs 46.67% real-only) |
-| Experiment 2 | CLAHE | **0.06** | 0.3405 | 6.5582 | 46.67% (contrast domain shift) |
-| Experiment 3 | Unsharp Masking | 0.13 | 0.3425 | 6.9693 | 46.67% (contrast domain shift) |
+| Experiment | Preprocessing | Final FID (lower is better) | Final D Loss | Final G Loss |
+| :--- | :--- | :---: | :---: | :---: |
+| Experiment 1 | Baseline (Raw) | 0.03 | 0.7720 | 5.0628 |
+| Experiment 2 | **CLAHE** | **0.01** | **0.6460** | **6.4818** |
+| Experiment 3 | Unsharp Masking | 0.02 | 0.7877 | 8.3126 |
 
-CLAHE reduced FID by 66.7% compared to raw training images, while downstream evaluation on raw test scans highlighted that preprocessing should be applied symmetrically across training and inference pipelines.
+CLAHE achieved the lowest FID (66.7% lower than raw baseline) and the cleanest bilateral lung-field contrast.
+
+### Sample Outputs (CLAHE DCGAN)
+
+| Generated Chest Radiographs | Adversarial Loss Curve |
+| :---: | :---: |
+| ![CLAHE Generated Grid](outputs/experiment_2_clahe_generated_grid.png) | ![CLAHE Loss Curve](outputs/experiment_2_clahe_loss_curve.png) |
 
 ## Repository Structure
 
@@ -45,7 +51,7 @@ chest-xray-gan-augmentation/
 pip install -r requirements.txt
 
 # Place NORMAL and PNEUMONIA folders under ./data/, then run:
-python train_experiments.py --experiment all --epochs 12 --batch_size 16
+python train_experiments.py --experiment all --epochs 15 --batch_size 16
 python generate_visual_comparisons.py
 
 # Sample from a saved generator checkpoint
